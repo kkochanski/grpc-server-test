@@ -1,0 +1,73 @@
+buildscript {
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.2.7.RELEASE")
+    }
+}
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.2.7.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'com.google.protobuf' version '0.8.12'
+}
+
+group = 'vxstream'
+version = '1.0.0'
+sourceCompatibility = '11'
+
+repositories {
+    mavenCentral()
+}
+
+bootJar {
+    archiveFileName = 'VxObjectStorage.jar'
+}
+
+dependencies {
+    implementation 'io.grpc:grpc-netty-shaded:1.29.0'
+    implementation "io.grpc:grpc-protobuf:1.29.0"
+    implementation "io.grpc:grpc-stub:1.29.0"
+    compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
+
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-configuration-processor'
+    implementation 'net.devh:grpc-server-spring-boot-starter:2.8.0.RELEASE'
+
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    // JUnit-Test-Framework
+    testImplementation('org.junit.jupiter:junit-jupiter-api')
+    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine')
+    // Grpc-Test-Support
+    testImplementation('io.grpc:grpc-testing:1.29.0')
+    // Spring-Test-Support (Optional)
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        // Exclude the test engine you don't need
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.11.4"
+    }
+    generatedFilesBaseDir = "$projectDir/src/main/java/generated"
+    clean {
+        delete generatedFilesBaseDir
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:1.29.0"
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+}
